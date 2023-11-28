@@ -485,7 +485,16 @@ impl<'a> Macro<'a> {
             opt(Whitespace::parse),
             ws(keyword("macro")),
             cut(tuple((
-                ws(identifier),
+                ws(|init_i| {
+                    let (name, i) = identifier(init_i)?;
+                    match name {
+                        "super" => Err(nom::Err::Failure(ErrorContext {
+                            input: init_i,
+                            message: Some(Cow::Owned(format!("Macro name `{name}` is reserved"))),
+                        })),
+                        _ => Ok((name, i)),
+                    }
+                }),
                 opt(ws(parameters)),
                 opt(Whitespace::parse),
                 |i| s.tag_block_end(i),

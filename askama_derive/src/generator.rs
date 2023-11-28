@@ -684,7 +684,13 @@ impl<'a> Generator<'a> {
             ref args,
         } = *call;
         if name == "super" {
-            return self.write_block(buf, None, ws);
+            return match args.len() {
+                0 => self.write_block(buf, None, ws),
+                _ => Err(CompileError::from(format!(
+                    "macro \"super\" expected 0 arguments, found {}",
+                    args.len()
+                ))),
+            };
         }
 
         let (def, own_ctx) = match scope {
